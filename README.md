@@ -4,8 +4,12 @@ This repository is used for generating polarization reports of 13C NMR hyperpola
 
 Two data examples acquired on a 60 MHz Ultra Spinsolve (1H, 13C) are found in the **Data** folder. These include a *1-point polarization test* with a matching *thermal* measurement and a *5-point polarization test* with a matching *thermal* measurement. After acqusition, 1 % (v/v) Gd-DOTAREM was added to the sample to lower the T1, and the thermal measurement was acquired. For the 5-point test, the hyperpolarized compound was divided into 5 NMR tubes and kept outside the magnet and run sequentially in order to estimate the *ambient* magnetic field in the room. The generated reports from these two datasets can be found in the **Reports** folder, and looks like the following:
 
-<img src="image/HP_1p_example_pyruvate_HPpolreport_1p.png" width=50% height=50%>
-<img src="image/HP_5p_example_pyruvate_HPpolreport_5p.png" width=50% height=50%>
+
+<div style="display: flex; justify-content: space-around;">
+  <img src="image/HP_1p_example_pyruvate_HPpolreport_1p.png" width=49% height=49%>
+  <img src="image/HP_5p_example_pyruvate_HPpolreport_5p.png" width=49% height=49%>
+</div>
+
 
 The two scripts **PolReport_1p.py** and **PolReport_5p.py** are used to generate the two respective reports.
 
