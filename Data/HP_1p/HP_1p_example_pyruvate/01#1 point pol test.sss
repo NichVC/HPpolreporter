@@ -1,0 +1,10 @@
+TimeStampFolder           = "C:\PROJECTS\DATA\Hyperpolarization\Poltest\Hyperpol"  # Change to the correct path
+CarbonPhase               = "FirstScan"
+
+# Loop 
+loop(80, 00:00:00:000)
+  RunProtocol("1D CARBON+ WALTZ",  ["Number=1", "RepetitionTime=2", "PulseAngle=5", "CenterFrequency=110", "NoeEnhancement=no", "Decouple=yes"],["scan_ReceiverGain=20",  "skipChecks=yes"])
+endloop
+
+wait(00:00:10:000)
+RunMnovaFile("ScriptUtilities/ReactionMonitor.qs", "process", ["13C"])

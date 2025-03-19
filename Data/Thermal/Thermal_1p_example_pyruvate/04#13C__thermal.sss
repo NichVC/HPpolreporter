@@ -1,0 +1,15 @@
+TimeStampFolder           = "C:\PROJECTS\DATA\Hyperpolarization\Poltest\Thermal"  # Change to the correct path
+CarbonPhase               = "FirstScan"
+
+# wait(00:00:00:000)  # Time before starting the experiment in hh:mm:ss:mmm
+
+# You need to change the scan_ReceiverGain to the new value
+
+RunProtocol("1D CARBON+ WALTZ",  ["Number=256", "RepetitionTime=2", "PulseAngle=90", "CenterFrequency=110", "NoeEnhancement=no", "Decouple=yes"], ["scan_ReceiverGain=30"])
+
+
+
+
+# These 2 steps are optional under automation to collect the non-polirized spectrum as part of the script
+# wait(00:05:00:000) # Time before taking the non-polirized spectrum in hh:mm:ss:mmm
+# RunProtocol("1D CARBON+",  ["Number=1", "RepetitionTime=30", "PulseAngle=90", "NoeEnhancement=no", "Decouple=yes", "SaveScans=yes"], ["scan_ReceiverGain=40"])
