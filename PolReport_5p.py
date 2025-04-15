@@ -176,7 +176,7 @@ def gauss_lorentz(x, A_gaussian, mu_gaussian, sigma_gaussian, A_lorentzian, x0_l
     )
 
     
-def Spectrum(folder):
+def Spectrum(folder, probe):
     """
     Analyzes a preprocessed and phased spectrum from a specified folder and 
     performs Gaussian-Lorentzian fitting to estimate the peak area.
@@ -212,8 +212,15 @@ def Spectrum(folder):
     # Fixed window size for fitting
     points_around_peak = 50
 
+    # Define window from probe selection for peak search 
+    indices_region = np.zeros(2, dtype= int)
+    indices_region[0] = np.abs(x - probe['peak_region'][1]).argmin()
+    indices_region[1] = np.abs(x - probe['peak_region'][0]).argmin()
+    
+    # Find the index of the maximum intensity (peak)
+    max_index = indices_region[0] + np.argmax(y[indices_region[0]:indices_region[1]])
+    
     # Identify the peak and determine the region of interest (ROI)
-    max_index = np.argmax(y)
     indices = [max_index - points_around_peak - 1, max_index + points_around_peak]
 
     # Estimate the integral of the raw data in the ROI
@@ -238,7 +245,7 @@ def Spectrum(folder):
 
     return integral, y, x, fit_curve, indices
 
-def IntegralPeak(folder):
+def IntegralPeak(folder, probe):
     """
     Computes the integral (area under the curve) of a peak from a preprocessed 
     and phased spectrum file ('spectrum_processed.1d').
@@ -270,8 +277,13 @@ def IntegralPeak(folder):
     # Fixed window size for integration
     points_around_peak = 50
 
+    # Define window from probe selection for peak search
+    indices_region = np.zeros(2, dtype= int)
+    indices_region[0] = np.abs(x - probe['peak_region'][1]).argmin()
+    indices_region[1] = np.abs(x - probe['peak_region'][0]).argmin()
+    
     # Find the index of the maximum intensity (peak)
-    max_index = np.argmax(y)
+    max_index = indices_region[0] + np.argmax(y[indices_region[0]:indices_region[1]])
 
     # Determine the start and end indices of the region of interest (ROI)
     indices = [max_index - points_around_peak - 1, max_index + points_around_peak]
@@ -358,7 +370,9 @@ def main_calculations(bioprobe, base_dir, thermal_dir, hyperpol_dir, t):
         5: {'name': 'Alanine', 'peak_region': [178, 174]},
         6: {'name': 'KIC', 'peak_region': [172.5, 170]},
         7: {'name': 'C2-Pyruvate (D2O)', 'peak_region': [207, 203]},
-        8: {'name': 'Pyruvate (D2O)', 'peak_region': [174, 166]}
+        8: {'name': 'Pyruvate (D2O)', 'peak_region': [174, 166]},
+        9: {'name': 'Z-OMPD (C1)', 'peak_region': [175, 165]},
+        10: {'name': 'Z-OMPD (C5)', 'peak_region': [185, 175]}
     }
 
     # Get bioprobe-specific details
@@ -380,8 +394,8 @@ def main_calculations(bioprobe, base_dir, thermal_dir, hyperpol_dir, t):
     hyperpol_par = read_par(hyperpol_dir)
 
     # Load spectra data for both thermal and hyperpolarized samples
-    I_them, thermal_y, thermal_x, them_curve, them_curve_x = Spectrum(thermal_dir)
-    I_hyp, hyp_y, hyp_x, hyp_curve, hyp_curve_x = Spectrum(hyperpol_dir)
+    I_them, thermal_y, thermal_x, them_curve, them_curve_x = Spectrum(thermal_dir, bioprobe_data)
+    I_hyp, hyp_y, hyp_x, hyp_curve, hyp_curve_x = Spectrum(hyperpol_dir, bioprobe_data)
 
     # Receiver gain and flip angle corrections
     RG_hyp = int(hyperpol_par[2])
@@ -415,7 +429,7 @@ def main_calculations(bioprobe, base_dir, thermal_dir, hyperpol_dir, t):
     percentage_complete = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     j = 0
     for i in range(1, len(hyperpol_list)):
-        I_hyp_ALL.append(IntegralPeak(hyperpol_list[i]))
+        I_hyp_ALL.append(IntegralPeak(hyperpol_list[i], bioprobe_data))
         if i % int((len(hyperpol_list) - 1) / 10) == 0:
             try:
                 print(f'{percentage_complete[j]} % complete')
@@ -582,7 +596,7 @@ def main():
     t = int(input('Time from measurement (in seconds): '))
     # The choice of bioprobe only affects the name used in the report.
     # More customization could be used if desired, e.g. more peak picking and so on.
-    bioprobe = int(input('\nBioprobe?\nC1-Urea [0], C1-Pyruvate [1], C2-Pyruvate [2], Fumarate [3], HP001 [4], Alanine [5]: '))
+    bioprobe = int(input('\nBioprobe?\nC1-Urea [0], C1-Pyruvate [1], C2-Pyruvate [2], Fumarate [3], HP001 [4], Alanine [5], KIC [6], C2-Pyruvate (deuterium) [7], Pyruvate (deuterium) [8], Z-OMPD (C1) [9], Z-OMPD (C5) [10]: '))
 
     # Get script dir for future reference and saving purposes.
     base_dir = os.getcwd()
@@ -590,12 +604,12 @@ def main():
     # Get the thermal data
     root = tkinter.Tk()
     root.withdraw()
-    thermal_dir = tkinter.filedialog.askdirectory(initialdir="Data/Thermal")
+    thermal_dir = tkinter.filedialog.askdirectory(title='Select thermal data folder', initialdir="Data/Thermal")
     
     # Get the hyperpolarized data from a 1-point test (1 sample)
     root = tkinter.Tk()
     root.withdraw()
-    hyperpol_dir = tkinter.filedialog.askdirectory(initialdir="Data/HP_5p")
+    hyperpol_dir = tkinter.filedialog.askdirectory(title='Select hyper data folder (5-point)', initialdir="Data/HP_5p")
 
     print('\nData loaded, generating report...')
     
